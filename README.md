@@ -56,6 +56,15 @@ ext = txt|tex|md|pdf|doc|docx
 > tipo-data(-fila)?-extra.ext
 ```
 
+# Implementazione del parser
+
+Per il parse dell'intero file, usiamo un parser semplicistico manipolando la
+stringa, in quanto l'analisi delle definizioni e dei commenti è piuttosto facile.
+Per il parse della linea finale, che contiene la concatenazione di tutte le
+regole, usiamo invece un piccolo DFA con sideeffect come segue:
+
+![DFA per il riconoscimento del nome del file](./automata.svg)
+
 # Origine del nome
 
 [^1] è uno dei top-10 nomi suggeriti da chat gpt. Abbiamo usato il prompt:
