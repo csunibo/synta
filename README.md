@@ -73,6 +73,15 @@ I sideeffect sono:
 - `concat`: concatena il simbolo letto ad `id`
 - `list`: inserisce `id` nella lista degli identificatori, e imposta `id = ""`
 
+## Sviluppo
+
+Ecco una lista dei file nella repository e il loro scopo:
+```
+├── data.go        # Strutture dati per il parser
+├── parser.go      # Logica di parsing e DFA
+├── parser_test.go # Unit test per il parser
+```
+
 # Origine del nome
 
 [^1] è uno dei top-10 nomi suggeriti da chat gpt. Abbiamo usato il prompt:
