@@ -1,16 +1,19 @@
 # Synta
 
 Synta [^1] è uno strumento a linea di comando per svolgere svariate operazioni
-sul formato di definizione regolare usato internamente a [csunibo](https://github.com/csunibo)
-per vincolare le nomenclature dei file. Con Synta è possibile:
-- Verificare la validità di un file `.synta`
-- Convertire un file `.synta` in una espressione regolare
-- Convertire un file `.synta` in un file JSON che descrivre i contenuti dei file.
-    Il file JSON generato è descritto dallo schema JSON disponibile [qui](TODO).
+sul formato di definizione regolare usato internamente a
+[csunibo](https://github.com/csunibo) per vincolare le nomenclature dei file.
+Con Synta è possibile:
+
+- verificare la validità di un file `.synta`;
+- convertire un file `.synta` in una espressione regolare;
+- convertire un file `.synta` in un file JSON che descrive i contenuti dei file.
+  Il file JSON generato è descritto dallo schema JSON disponibile [qui](TODO).
 
 # Definizione del linguaggio
 
 Il linguaggio Synta è definito dalla seguente BNF:
+
 ```bnf
 <upperletter> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" |
                   "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" |
@@ -38,6 +41,7 @@ Il linguaggio Synta è definito dalla seguente BNF:
 
 <language>    ::= <commdefs> <main>
 ```
+
 dove `<regexp>` è una valida sintassi che esprime una espressione regolare.
 
 ## Esempi
@@ -68,4 +72,6 @@ regole, usiamo invece un piccolo DFA con sideeffect come segue:
 # Origine del nome
 
 [^1] è uno dei top-10 nomi suggeriti da chat gpt. Abbiamo usato il prompt:
-> suggest me a short name for a tiny parser command line utility. the name must not be made up of two or more words
+
+> suggest me a short name for a tiny parser command line utility. the name must
+> not be made up of two or more words
