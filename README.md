@@ -37,7 +37,7 @@ Il linguaggio Synta è definito dalla seguente BNF:
 
 <segment>     ::= "-" <id> | "(-" <id> ")?"
 <join>        ::= <segment> <join> | <segment>
-<main>        ::= "> " <join> "." <id> "\n"
+<main>        ::= "> " <id> <join> "." <id> "\n"
 
 <language>    ::= <commdefs> <main>
 ```
