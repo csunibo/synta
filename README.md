@@ -4,6 +4,7 @@ Synta [^1] è uno strumento a linea di comando per svolgere svariate operazioni
 sul formato di definizione regolare usato internamente a [csunibo](https://github.com/csunibo)
 per vincolare le nomenclature dei file. Con Synta è possibile:
 - Verificare la validità di un file `.synta`
+- Un formatter per i file `.synta`
 - Convertire un file `.synta` in una espressione regolare
 - Convertire un file `.synta` in un file JSON che descrivre i contenuti dei file.
     Il file JSON generato è descritto dallo schema JSON disponibile [qui](TODO).
@@ -64,6 +65,15 @@ Per il parse della linea finale, che contiene la concatenazione di tutte le
 regole, usiamo invece un piccolo DFA con sideeffect come segue:
 
 ![DFA per il riconoscimento del nome del file](./automata.svg)
+
+## Sviluppo
+
+Ecco una lista dei file nella repository e il loro scopo:
+```
+├── data.go        # Strutture dati per il parser
+├── parser.go      # Logica di parsing e DFA
+├── parser_test.go # Unit test per il parser
+```
 
 # Origine del nome
 
