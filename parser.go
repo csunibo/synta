@@ -8,19 +8,31 @@ import (
 
 func ParseSynta(contents string) (s Synta, err error) {
 	lines := strings.Split(contents, "\n")
-	definitionLines, filenameLine := lines[:len(lines)-2], lines[len(lines)-1]
 
 	var (
-		i   = uint(0)
-		id  = Identifier("")
-		def = Definition{}
+		i               = 0
+		id              = Identifier("")
+		def             = Definition{}
+		definitionLines = []string{}
+		filenameLine    = ""
 	)
-	for err == nil {
+	if len(lines) > 1 {
+		definitionLines = lines[:len(lines)-2]
+		filenameLine = lines[len(lines)-1]
+	} else {
+		filenameLine = lines[0]
+	}
+
+	s.Definitions = map[Identifier]Definition{}
+	for err == nil || i < len(definitionLines) {
 		i, id, def, err = ParseNextDefinition(definitionLines, i)
 		if _, ok := s.Definitions[id]; ok {
 			return s, fmt.Errorf("Defintion for `%s` is provided twice", id)
 		}
 		s.Definitions[id] = def
+	}
+	if err != nil {
+		return
 	}
 
 	s.Filename, err = ParseFilename(filenameLine)
@@ -31,7 +43,7 @@ func ParseSynta(contents string) (s Synta, err error) {
 	return
 }
 
-func ParseNextDefinition(lines []string, start uint) (i uint, id Identifier, def Definition, err error) {
+func ParseNextDefinition(lines []string, start int) (i int, id Identifier, def Definition, err error) {
 	i = start
 
 	// TODO:
