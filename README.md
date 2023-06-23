@@ -7,7 +7,7 @@ Con Synta è possibile:
 
 - verificare la validità di un file `.synta`;
 - convertire un file `.synta` in una espressione regolare;
-- convertire un file `.synta` in un file JSON che descrive i contenuti dei file.
+- convertire un file `.synta` in un file JSON che ne descrive i contenuti.
   Il file JSON generato è descritto dallo schema JSON disponibile [qui](TODO).
 
 # Definizione del linguaggio
