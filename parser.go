@@ -18,10 +18,13 @@ func ParseSynta(contents string) (s Synta, err error) {
 		filenameLine    = ""
 	)
 	if len(lines) > 1 {
-		definitionLines = lines[:len(lines)-2]
+		definitionLines = lines[:len(lines)-1]
 		filenameLine = lines[len(lines)-1]
-	} else {
+	} else if len(lines) == 1 {
 		filenameLine = lines[0]
+	} else {
+		err = errors.New("Empty file provided")
+		return
 	}
 
 	s.Definitions = map[Identifier]Definition{}
@@ -29,8 +32,9 @@ func ParseSynta(contents string) (s Synta, err error) {
 		i, id, def, err = ParseNextDefinition(definitionLines, i)
 		if _, ok := s.Definitions[id]; ok {
 			return s, fmt.Errorf("Defintion for `%s` is provided twice", id)
+		} else if err == nil {
+			s.Definitions[id] = def
 		}
-		s.Definitions[id] = def
 	}
 	if err != nil {
 		return
@@ -50,17 +54,20 @@ func ParseNextDefinition(lines []string, start int) (i int, id Identifier, def D
 	// TODO:
 	// loop until definition row, accumulate comments,
 	// when a def is reached, simply parse it and check the regexp. Then return
-	for i, line := range lines {
+	for j, line := range lines {
+		i = j
 		if line[0] == ';' {
 			def.Comments = append(def.Comments, line)
 		} else {
 			parsed_line := strings.Split(line, " = ")
-			id := Identifier(parsed_line[0])
+			id = Identifier(parsed_line[0])
 			def.Regexp = regexp.MustCompile(parsed_line[1])
-			return i, id, def, nil
+			err = nil
+			return
 		}
 	}
-	return i, id, def, errors.New("No next Definition")
+	err = errors.New("No next definition")
+	return
 }
 
 type State uint8
@@ -75,7 +82,6 @@ const (
 	State6
 	State7
 	State8
-	State9
 )
 
 func isLetter(c byte) bool {
@@ -126,11 +132,66 @@ func ParseFilename(line string) (def []Segment, err error) {
 			} else if c == '-' {
 				push(def, &seg)
 				state = State0
+			} else if c == '(' {
+				push(def, &seg)
+				state = State2
+			} else if c == '.' {
+				push(def, &seg)
+				state = State7
 			} else {
-				err = errors.New("Expected either a char or a -")
+				err = errors.New("Expected either a char, or a -, or a ( or a .")
+			}
+		case State2:
+			if c == '-' {
+				state = State3
+			} else {
+				err = errors.New("Expected a -")
+			}
+		case State3:
+			if isLetter(c) {
+				concat(&seg, c)
+				state = State4
+			} else {
+				err = errors.New("Expected a char")
+			}
+		case State4:
+			if isLetter(c) {
+				concat(&seg, c)
+			} else if c == ')' {
+				state = State5
+			} else {
+				err = errors.New("Expected a char")
+			}
+		case State5:
+			if c == '?' {
+				push(def, &seg)
+				state = State6
+			} else {
+				err = errors.New("Expected a ?")
+			}
+		case State6:
+			if c == '-' {
+				state = State0
+			} else if c == '.' {
+				state = State7
+			} else {
+				err = errors.New("Expected a - or a ?")
+			}
+		case State7:
+			if isLetter(c) {
+				concat(&seg, c)
+				state = State8
+			} else {
+				err = errors.New("Expected a char")
+			}
+		case State8:
+			if isLetter(c) {
+				concat(&seg, c)
+			} else {
+				err = errors.New("Expected a char")
 			}
 		}
 	}
 
-	return def, err
+	return
 }
