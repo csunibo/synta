@@ -63,6 +63,39 @@ func ParseNextDefinition(lines []string, start int) (i int, id Identifier, def D
 	return i, id, def, errors.New("No next Definition")
 }
 
+type State uint8
+
+const (
+	State0 State = iota
+	State1
+	State2
+	State3
+	State4
+	State5
+	State6
+	State7
+	State8
+	State9
+)
+
+func isLetter(c byte) bool {
+	return c >= 'a' && c <= 'z'
+}
+
+func concat(seg *Segment, c byte) {
+	seg.Identifier = Identifier(string(seg.Identifier) + string(c))
+}
+
+func clear(seg *Segment) {
+	seg.Identifier = ""
+	seg.Optional = false
+}
+
+func push(segments []Segment, seg *Segment) {
+	segments = append(segments, *seg)
+	clear(seg)
+}
+
 func ParseFilename(line string) (def []Segment, err error) {
 	// TODO:
 	// 1. Check if the string starts with "> " and then trim it
@@ -70,57 +103,32 @@ func ParseFilename(line string) (def []Segment, err error) {
 	if line[:2] != "> " {
 		return def, errors.New("Not a Filename")
 	}
-
 	line = line[2:]
-	for i := 1; i < len(line); i++ {
-		var seg = Segment{}
-		switch { // Stato 0
-		case line[i] >= 'a' && line[i] <= 'z':
-			// concat
-			// Passo in stato 1 e ciclo concat fino a '-'
-			for ; line[i] >= 'a' && line[i] <= 'z'; i++ {
-				// concat
-			}
-			if line[i] != '-' {
-				// Errore
-			} else {
-				// list
-				i++
-			}
-		case line[i] == '(':
-			// Passo in stato 2 e gestisco il caso di parte ?
-			i++
-			if line[i] != '-' {
-				// Error
-			} else {
-				i++
-			}
-			for ; line[i] >= 'a' && line[i] <= 'z'; i++ {
-				// concat
-			}
-			if line[i] != ')' {
-				// Error
-			} else {
-				i++
-			}
-			if line[i] != '?' {
-				// Error
-			} else {
-				// list con opt == True
-				i++
-			}
+	state := State0
+	seg := Segment{}
+	clear(&seg)
 
-		case line[i] == '.':
-			// Passo in stato 6 per estensione file
-			i++
-			for ; line[i] >= 'a' && line[i] <= 'z'; i++ {
-				// concat
+	for i := 1; err == nil && i < len(line); i++ {
+		c := line[i]
+		switch state {
+		case State0:
+			if isLetter(c) {
+				concat(&seg, c)
+				state = State1
+			} else if c == '(' {
+				state = State2
+			} else {
+				err = errors.New("Expected either a char or a (")
 			}
-			if line[i] != '\n' {
-				// Error
+		case State1:
+			if isLetter(c) {
+				concat(&seg, c)
+			} else if c == '-' {
+				push(def, &seg)
+				state = State0
+			} else {
+				err = errors.New("Expected either a char or a -")
 			}
-		default:
-			// Errore
 		}
 	}
 
