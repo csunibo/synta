@@ -25,9 +25,9 @@ Il linguaggio Synta è definito dalla seguente BNF:
 <alphanum>    ::= <lowerletter> | <upperletter> | <digit>
 <char>        ::= <alphanum> | ":" | ";" | "," | "." | "-" | "_"
 <word>        ::= <char> <word> | <char>
-<text>        ::= <word> <text> | " " <word> | <word>
+<text>        ::= <word> " " <text> | <word>
 
-<comment>     ::= ";" <text> "\n"
+<comment>     ::= "; " <text> "\n"
 <id>          ::= <lowerletter> <id> | <lowerletter>
 <def>         ::= <id> " = " <regexp> "\n"
 <commdef>     ::= <comment> <commdef> | <comment> <def>
