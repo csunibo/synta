@@ -1,0 +1,7 @@
+word = [a-z]+
+
+ext = pdf|txt|tex|md
+
+useless = parziale|totale
+
+> word.ext
