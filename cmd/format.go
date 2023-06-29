@@ -4,7 +4,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io/ioutil"
 
+	"github.com/csunibo/synta"
+	"github.com/csunibo/synta/format"
 	"github.com/google/subcommands"
 )
 
@@ -27,11 +30,21 @@ func (p *formatCommand) SetFlags(f *flag.FlagSet) {
 }
 
 func (p *formatCommand) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
-	synta, status := parseFile(p, f)
+	syntaFilePtr, status := parseFile(p, f)
 	if status != subcommands.ExitSuccess {
 		return status
 	}
 
-	fmt.Println(synta)
+	syntaFile := *syntaFilePtr
+	if p.clear {
+		syntaFile = synta.Clear(syntaFile)
+	}
+
+	formatted := format.Format(syntaFile)
+	if p.write {
+		ioutil.WriteFile(f.Arg(0), []byte(formatted), 0664)
+	} else {
+		fmt.Printf("%s", formatted)
+	}
 	return subcommands.ExitSuccess
 }
