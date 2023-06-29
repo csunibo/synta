@@ -28,10 +28,11 @@ func ParseSynta(contents string) (s Synta, err error) {
 	}
 
 	s.Definitions = map[Identifier]Definition{}
-	for err == nil || i < len(definitionLines) {
+	for i < len(definitionLines) {
 		i, id, def, err = ParseNextDefinition(definitionLines, i)
 		if _, ok := s.Definitions[id]; ok {
-			return s, fmt.Errorf("Defintion for `%s` is provided twice", id)
+			err = fmt.Errorf("Defintion for `%s` is provided twice", id)
+			return
 		} else if err == nil {
 			s.Definitions[id] = def
 		}
@@ -41,10 +42,6 @@ func ParseSynta(contents string) (s Synta, err error) {
 	}
 
 	s.Filename, err = ParseFilename(filenameLine)
-	if len(s.Filename) == 0 {
-		return s, errors.New("No filename construction specified")
-	}
-
 	return
 }
 
@@ -54,15 +51,15 @@ func ParseNextDefinition(lines []string, start int) (i int, id Identifier, def D
 	// TODO:
 	// loop until definition row, accumulate comments,
 	// when a def is reached, simply parse it and check the regexp. Then return
-	for j, line := range lines {
-		i = j
+	for _, line := range lines {
+		i++
 		if line[0] == ';' {
 			def.Comments = append(def.Comments, line)
 		} else {
 			parsed_line := strings.Split(line, " = ")
 			id = Identifier(parsed_line[0])
-			def.Regexp = regexp.MustCompile(parsed_line[1])
 			err = nil
+			def.Regexp, err = regexp.Compile(parsed_line[1])
 			return
 		}
 	}
@@ -97,16 +94,18 @@ func clear(seg *Segment) {
 	seg.Optional = false
 }
 
-func push(segments []Segment, seg *Segment) {
-	segments = append(segments, *seg)
+func push(segments []Segment, seg *Segment) (updatedSegments []Segment) {
+	updatedSegments = append(segments, *seg)
 	clear(seg)
+	return
 }
 
 func ParseFilename(line string) (def []Segment, err error) {
 	// TODO:
 	// 1. Check if the string starts with "> " and then trim it
 	// 2. Implement the DFA and compute the segments
-	if line[:2] != "> " {
+	if len(line) < 2 || line[:2] != "> " {
+		err = errors.New("Not a Filename")
 		return def, errors.New("Not a Filename")
 	}
 	line = line[2:]
@@ -114,7 +113,7 @@ func ParseFilename(line string) (def []Segment, err error) {
 	seg := Segment{}
 	clear(&seg)
 
-	for i := 1; err == nil && i < len(line); i++ {
+	for i := 0; err == nil && i < len(line); i++ {
 		c := line[i]
 		switch state {
 		case State0:
@@ -130,13 +129,13 @@ func ParseFilename(line string) (def []Segment, err error) {
 			if isLetter(c) {
 				concat(&seg, c)
 			} else if c == '-' {
-				push(def, &seg)
+				def = push(def, &seg)
 				state = State0
 			} else if c == '(' {
-				push(def, &seg)
+				def = push(def, &seg)
 				state = State2
 			} else if c == '.' {
-				push(def, &seg)
+				def = push(def, &seg)
 				state = State7
 			} else {
 				err = errors.New("Expected either a char, or a -, or a ( or a .")
@@ -164,7 +163,7 @@ func ParseFilename(line string) (def []Segment, err error) {
 			}
 		case State5:
 			if c == '?' {
-				push(def, &seg)
+				def = push(def, &seg)
 				state = State6
 			} else {
 				err = errors.New("Expected a ?")
@@ -192,6 +191,7 @@ func ParseFilename(line string) (def []Segment, err error) {
 			}
 		}
 	}
+	def = push(def, &seg)
 
 	return
 }
