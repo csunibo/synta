@@ -4,6 +4,9 @@ import (
 	"regexp"
 )
 
+// A regexp which describes an identifier
+var IdentifierRegexp = regexp.MustCompile("[a-z]+")
+
 // An Identifier is a lowercase alphabetical string.
 // It corresponds to the <id> BNF definition
 type Identifier string

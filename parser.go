@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+// ParseSynta attempts to parse a file's contents into a Synta internal
+// representation. If an error is encountered the parsing is aborted and the
+// error returned
 func ParseSynta(contents string) (s Synta, err error) {
 	lines := strings.Split(contents, "\n")
 
@@ -45,21 +48,26 @@ func ParseSynta(contents string) (s Synta, err error) {
 	return
 }
 
+// ParseNextDefinition loops from the start line, until a definition is found.
+// All the lines from start to the defintion must be comments. If the defintion
+// identifier is not valid, we return an error, otherwise, the definition index,
+// the definition identifier and the definition itself are returned.
 func ParseNextDefinition(lines []string, start int) (i int, id Identifier, def Definition, err error) {
 	i = start
 
-	// TODO:
-	// loop until definition row, accumulate comments,
-	// when a def is reached, simply parse it and check the regexp. Then return
 	for _, line := range lines {
 		i++
 		if line[0] == ';' {
 			def.Comments = append(def.Comments, line)
 		} else {
 			parsed_line := strings.Split(line, " = ")
-			id = Identifier(parsed_line[0])
-			err = nil
-			def.Regexp, err = regexp.Compile(parsed_line[1])
+			raw_id, expr := parsed_line[0], parsed_line[1]
+			if !IdentifierRegexp.Match([]byte(raw_id)) {
+				err = fmt.Errorf("Invalid identifier: %s", raw_id)
+				return
+			}
+			id = Identifier(raw_id)
+			def.Regexp, err = regexp.Compile(expr)
 			return
 		}
 	}
@@ -100,10 +108,11 @@ func push(segments []Segment, seg *Segment) (updatedSegments []Segment) {
 	return
 }
 
+// ParseFilename checks if the line starts with "> ", or errors otherwise.
+// Then, it parses a list of segments from the line using a DFA. If an invalid
+// char is found, an error is returned, otherwise the result is the list of
+// prased defintions.
 func ParseFilename(line string) (def []Segment, err error) {
-	// TODO:
-	// 1. Check if the string starts with "> " and then trim it
-	// 2. Implement the DFA and compute the segments
 	if len(line) < 2 || line[:2] != "> " {
 		err = errors.New("Not a Filename")
 		return def, errors.New("Not a Filename")
