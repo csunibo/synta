@@ -15,6 +15,7 @@ func main() {
 	subcommands.Register(subcommands.CommandsCommand(), "")
 	subcommands.Register(&formatCommand{}, "")
 	subcommands.Register(&checkCommand{}, "")
+	subcommands.Register(&jsonSchemaCommand{}, "")
 
 	flag.Parse()
 	ctx := context.Background()

@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/csunibo/synta/synta",
+  "$ref": "#/$defs/Synta",
+  "$defs": {
+    "Definition": {
+      "properties": {
+        "Comments": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Regexp": {
+          "$ref": "#/$defs/Regexp"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "Comments",
+        "Regexp"
+      ]
+    },
+    "Filename": {
+      "properties": {
+        "Segments": {
+          "items": {
+            "$ref": "#/$defs/Segment"
+          },
+          "type": "array"
+        },
+        "Extension": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "Segments",
+        "Extension"
+      ]
+    },
+    "Regexp": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Segment": {
+      "properties": {
+        "Identifier": {
+          "type": "string"
+        },
+        "Optional": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "Identifier",
+        "Optional"
+      ]
+    },
+    "Synta": {
+      "properties": {
+        "Definitions": {
+          "patternProperties": {
+            ".*": {
+              "$ref": "#/$defs/Definition"
+            }
+          },
+          "type": "object"
+        },
+        "Filename": {
+          "$ref": "#/$defs/Filename"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "Definitions",
+        "Filename"
+      ]
+    }
+  }
+}
