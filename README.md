@@ -67,7 +67,11 @@ stringa, in quanto l'analisi delle definizioni e dei commenti è piuttosto facil
 Per il parse della linea finale, che contiene la concatenazione di tutte le
 regole, usiamo invece un piccolo DFA con sideeffect come segue:
 
-![DFA per il riconoscimento del nome del file](./automata.svg)
+![DFA per il riconoscimento del nome del file](./automata.jpg)
+
+I sideeffect sono:
+- `concat`: concatena il simbolo letto ad `id`
+- `list`: inserisce `id` nella lista degli identificatori, e imposta `id = ""`
 
 # Origine del nome
 
