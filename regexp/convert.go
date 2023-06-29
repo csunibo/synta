@@ -18,12 +18,12 @@ func Convert(synta synta.Synta) (expr *regexp.Regexp, err error) {
         }
 
         if segment.Optional {
-            finalString += "(-" + definition.Regexp.String() + ")?" 
+            finalString += "(-(" + definition.Regexp.String() + "))?" 
         } else {
             finalString += "(" + definition.Regexp.String() + ")"
         }
 
-        if i != len(synta.Filename.Segments) - 1 {
+        if i != len(synta.Filename.Segments) - 1 && !synta.Filename.Segments[i+1].Optional {
             finalString += "-"
         }
     }
