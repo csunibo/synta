@@ -21,13 +21,11 @@ Il linguaggio Synta è definito dalla seguente BNF:
 <lowerletter> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" |
                   "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" |
                   "u" | "v" | "w" | "x" | "y" | "z"
-<char>      ::= <lowerletter> | <upperletter> | ":" | ";" | "," | "." | "-" | "_"
-<word>        ::= <char> <word> | <char>
-
 <digit>       ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-<number>      ::= <digit> <number> | <digit>
-<alphanum>    ::= <lowerletter> | <digit>
-<text>        ::= <alphanum> <text> | " " <text> | <alphanum>
+<alphanum>    ::= <lowerletter> | <upperletter> | <digit>
+<char>        ::= <alphanum> | ":" | ";" | "," | "." | "-" | "_"
+<word>        ::= <char> <word> | <char>
+<text>        ::= <word> <text> | " " <word> | <word>
 
 <comment>     ::= ";" <text> "\n"
 <id>          ::= <lowerletter> <id> | <lowerletter>
