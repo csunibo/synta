@@ -64,7 +64,17 @@ func ParseSynta(contents string) (s Synta, err error) {
 			return
 		}
 	}
+
 	return
+}
+
+func MustSynta(contents string) Synta {
+    s, err := ParseSynta(contents)
+    if err != nil {
+        panic(err)
+    }
+
+    return s
 }
 
 // ParseNextDefinition loops from the start line, until a definition is found.
