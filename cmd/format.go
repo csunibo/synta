@@ -19,7 +19,7 @@ type formatCommand struct {
 func (*formatCommand) Name() string     { return "format" }
 func (*formatCommand) Synopsis() string { return "Format a synta file in the standard style." }
 func (*formatCommand) Usage() string {
-	return `format [-clear] [-write] <fle>:
+	return `format [-clear] [-write] <file>:
   Format a synta file in the standard style.
 `
 }
