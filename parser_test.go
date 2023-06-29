@@ -70,7 +70,7 @@ func TestParseSyntaWithSingleDefinition(t *testing.T) {
 	assert.NotEmpty(t, synta.Definitions)
 
 	exp := StringDefintions{
-		"test": StringDefinition{"a|b", []string(nil)},
+		"test": {"a|b", []string(nil)},
 	}
 	checkDefinitions(t, synta.Definitions, exp)
 
@@ -90,7 +90,7 @@ test = a|b
 	assert.NotEmpty(t, synta.Definitions)
 
 	exp := StringDefintions{
-		"test": StringDefinition{"a|b", []string{"a test comment"}},
+		"test": {"a|b", []string{"a test comment"}},
 	}
 	checkDefinitions(t, synta.Definitions, exp)
 
@@ -111,7 +111,7 @@ test = a|b
 	assert.NotEmpty(t, synta.Definitions)
 
 	exp := StringDefintions{
-		"test": StringDefinition{"a|b", []string{"a test comment", "a second comment"}},
+		"test": {"a|b", []string{"a test comment", "a second comment"}},
 	}
 	checkDefinitions(t, synta.Definitions, exp)
 
@@ -135,8 +135,8 @@ teest = a|b
 	assert.NotEmpty(t, synta.Definitions)
 
 	exp := StringDefintions{
-		"test":  StringDefinition{"a|b", []string{"a test comment", "a second comment"}},
-		"teest": StringDefinition{"a|b", []string{"a test comment", "a second comment"}},
+		"test":  {"a|b", []string{"a test comment", "a second comment"}},
+		"teest": {"a|b", []string{"a test comment", "a second comment"}},
 	}
 	checkDefinitions(t, synta.Definitions, exp)
 
@@ -157,7 +157,7 @@ test = a|b
 	assert.NotEmpty(t, synta.Definitions)
 
 	exp := StringDefintions{
-		"test": StringDefinition{"a|b", []string{"a test comment", "a second comment"}},
+		"test": {"a|b", []string{"a test comment", "a second comment"}},
 	}
 	checkDefinitions(t, synta.Definitions, exp)
 
