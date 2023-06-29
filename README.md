@@ -49,8 +49,10 @@ anche compatibile con quella di Javascript e Rust.
 ```
 ; La tipologia della prova
 tipo = scritto|orale
-; Una qualunque parola alfanumerica
+; Una data del tipo yyyy-mm-dd
 data = \d{4}-\d{2}-\d{2}
+; La fila e' un numero
+fila = \d
 ; Una qualunque parola alfanumerica
 extra = (\w|\d)+
 ; Estensione del file. Possibili valori:
