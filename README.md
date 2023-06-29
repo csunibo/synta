@@ -65,11 +65,11 @@ ext = txt|tex|md|pdf|doc|docx
 Per il parse dell'intero file, usiamo un parser semplicistico manipolando la
 stringa, in quanto l'analisi delle definizioni e dei commenti è piuttosto facile.
 Per il parse della linea finale, che contiene la concatenazione di tutte le
-regole, usiamo invece un piccolo DFA con sideeffect come segue:
+regole, usiamo invece un piccolo FSA con side-effect come segue:
 
-![DFA per il riconoscimento del nome del file](./automata.jpg)
+![FSA per il riconoscimento del nome del file](./automata.jpg)
 
-I sideeffect sono:
+I side-effect sono:
 - `concat`: concatena il simbolo letto ad `id`
 - `list`: inserisce `id` nella lista degli identificatori, e imposta `id = ""`
 
@@ -78,7 +78,7 @@ I sideeffect sono:
 Ecco una lista dei file nella repository e il loro scopo:
 ```
 ├── data.go        # Strutture dati per il parser
-├── parser.go      # Logica di parsing e DFA
+├── parser.go      # Logica di parsing e FSA
 ├── parser_test.go # Unit test per il parser
 ```
 
