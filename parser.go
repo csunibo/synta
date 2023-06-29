@@ -14,7 +14,7 @@ func ParseSynta(contents string) (s Synta, err error) {
 	lines := strings.Split(contents, "\n")
 
 	var (
-		i               = 0
+		consumed        = 0
 		id              = Identifier("")
 		def             = Definition{}
 		definitionLines = []string{}
@@ -24,15 +24,20 @@ func ParseSynta(contents string) (s Synta, err error) {
 		definitionLines = lines[:len(lines)-1]
 		filenameLine = lines[len(lines)-1]
 	} else if len(lines) == 1 {
-		filenameLine = lines[0]
+		err = errors.New("Missing either the filename or defintions")
 	} else {
 		err = errors.New("Empty file provided")
 		return
 	}
 
 	s.Definitions = map[Identifier]Definition{}
-	for i < len(definitionLines) {
-		i, id, def, err = ParseNextDefinition(definitionLines, i)
+	for len(definitionLines) > 0 {
+		consumed, id, def, err = ParseFirstDefinition(definitionLines)
+		definitionLines = definitionLines[consumed:]
+		if err != nil {
+			return
+		}
+
 		if _, ok := s.Definitions[id]; ok {
 			err = fmt.Errorf("Defintion for `%s` is provided twice", id)
 			return
@@ -40,11 +45,18 @@ func ParseSynta(contents string) (s Synta, err error) {
 			s.Definitions[id] = def
 		}
 	}
-	if err != nil {
-		return
-	}
 
 	s.Filename.Segments, s.Filename.Extension, err = ParseFilename(filenameLine)
+	requiredIdentifiers := []Identifier{s.Filename.Extension}
+	for _, seg := range s.Filename.Segments {
+		requiredIdentifiers = append(requiredIdentifiers, seg.Identifier)
+	}
+	for _, id := range requiredIdentifiers {
+		if _, ok := s.Definitions[id]; !ok {
+			err = fmt.Errorf("Missing defintion for `%s`", id)
+			return
+		}
+	}
 	return
 }
 
@@ -52,13 +64,11 @@ func ParseSynta(contents string) (s Synta, err error) {
 // All the lines from start to the defintion must be comments. If the defintion
 // identifier is not valid, we return an error, otherwise, the definition index,
 // the definition identifier and the definition itself are returned.
-func ParseNextDefinition(lines []string, start int) (i int, id Identifier, def Definition, err error) {
-	i = start
-
+func ParseFirstDefinition(lines []string) (consumed int, id Identifier, def Definition, err error) {
 	for _, line := range lines {
-		i++
+		consumed++
 		if line[0] == ';' {
-			def.Comments = append(def.Comments, line)
+			def.Comments = append(def.Comments, strings.TrimSpace(line[1:]))
 		} else {
 			parsed_line := strings.Split(line, " = ")
 			raw_id, expr := parsed_line[0], parsed_line[1]
@@ -142,6 +152,7 @@ func ParseFilename(line string) (def []Segment, ext Identifier, err error) {
 				state = State0
 			} else if c == '(' {
 				def = push(def, &seg)
+				seg.Optional = true
 				state = State2
 			} else if c == '.' {
 				def = push(def, &seg)
