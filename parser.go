@@ -12,6 +12,13 @@ import (
 // error returned
 func ParseSynta(contents string) (s Synta, err error) {
 	lines := strings.Split(contents, "\n")
+	// remove blank lines
+	for i := 0; i < len(lines); i++ {
+		lines[i] = strings.TrimSpace(lines[i])
+		if lines[i] == "" {
+			lines = append(lines[:i], lines[i+1:]...)
+		}
+	}
 
 	var (
 		consumed        = 0
