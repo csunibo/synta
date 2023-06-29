@@ -15,7 +15,7 @@ type regexpCommand struct {
 func (*regexpCommand) Name() string     { return "regexp" }
 func (*regexpCommand) Synopsis() string { return "Convert synta file into a regular expression" }
 func (*regexpCommand) Usage() string {
-	return `regexp <fle>:
+	return `regexp <file>:
   Convert synta file into a regular expression.
 `
 }

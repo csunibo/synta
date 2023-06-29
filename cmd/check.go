@@ -15,7 +15,7 @@ type checkCommand struct{}
 func (*checkCommand) Name() string     { return "check" }
 func (*checkCommand) Synopsis() string { return "Checks if a synta file has a corrent syntax." }
 func (*checkCommand) Usage() string {
-	return `check <fle>:
+	return `check <file>:
   Checks if a synta file has a corrent syntax.
 `
 }
