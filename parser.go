@@ -44,7 +44,7 @@ func ParseSynta(contents string) (s Synta, err error) {
 		return
 	}
 
-	s.Filename, err = ParseFilename(filenameLine)
+	s.Filename.Segments, s.Filename.Extension, err = ParseFilename(filenameLine)
 	return
 }
 
@@ -112,10 +112,10 @@ func push(segments []Segment, seg *Segment) (updatedSegments []Segment) {
 // Then, it parses a list of segments from the line using a DFA. If an invalid
 // char is found, an error is returned, otherwise the result is the list of
 // prased defintions.
-func ParseFilename(line string) (def []Segment, err error) {
+func ParseFilename(line string) (def []Segment, ext Identifier, err error) {
 	if len(line) < 2 || line[:2] != "> " {
 		err = errors.New("Not a Filename")
-		return def, errors.New("Not a Filename")
+		return
 	}
 	line = line[2:]
 	state := State0
@@ -200,7 +200,8 @@ func ParseFilename(line string) (def []Segment, err error) {
 			}
 		}
 	}
-	def = push(def, &seg)
+	// handle the filename extension
+	ext = seg.Identifier
 
 	return
 }

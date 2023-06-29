@@ -26,9 +26,15 @@ type Segment struct {
 	Optional   bool
 }
 
+type Filename struct {
+	Segments  []Segment
+	Extension Identifier
+}
+
 // Synta represents the contents of a Synta file
 // It corresponds to the <language> BNF definition
+// The last segment of the Filename is the extension
 type Synta struct {
 	Definitions map[Identifier]Definition
-	Filename    []Segment
+	Filename    Filename
 }
