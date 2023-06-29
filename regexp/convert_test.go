@@ -8,9 +8,9 @@ import (
 )
 
 func TestConvertBasic(t *testing.T) {
-    basicContent := `test = a|b
-    > test-test.test`
-    basicSynta, err := synta.ParseSynta(basicContent)
+    content := `test = a|b
+> test-test.test`
+    basicSynta, err := synta.ParseSynta(content)
     assert.Nil(t, err)
 
 	expr, err := Convert(basicSynta)
@@ -18,3 +18,47 @@ func TestConvertBasic(t *testing.T) {
     assert.Equal(t, "(a|b)-(a|b)\\.(a|b)", expr.String())
 }
 
+func TestConvertBasicOptional(t *testing.T) {
+    content := `test = a|b
+> test(-test)?.test`
+    basicSynta, err := synta.ParseSynta(content)
+    assert.Nil(t, err)
+
+	expr, err := Convert(basicSynta)
+	assert.Nil(t, err)
+    assert.Equal(t, "(a|b)(-(a|b))?\\.(a|b)", expr.String())
+}
+
+func TestConvertMutiple(t *testing.T) {
+    content := `test = a|b
+castoro = roditore|anfibio
+> test-castoro(-test)?.castoro`
+    basicSynta, err := synta.ParseSynta(content)
+    assert.Nil(t, err)
+
+	expr, err := Convert(basicSynta)
+	assert.Nil(t, err)
+    assert.Equal(t, "(a|b)-(roditore|anfibio)(-(a|b))?\\.(roditore|anfibio)", expr.String())
+}
+
+func TestConvertExapleOnReadme(t * testing.T) {
+    content := `; La tipologia della prova
+tipo = scritto|orale
+; Una data del tipo yyyy-mm-dd
+data = \d{4}-\d{2}-\d{2}
+; La fila e' un numero
+fila = \d
+; Una qualunque parola alfanumerica
+extra = (\w|\d)+
+; Estensione del file. Possibili valori:
+; - txt, tex, md, pdf, doc, docx
+ext = txt|tex|md|pdf|doc|docx
+
+> tipo-data(-fila)?-extra.ext`
+    basicSynta, err := synta.ParseSynta(content)
+    assert.Nil(t, err)
+
+	expr, err := Convert(basicSynta)
+	assert.Nil(t, err)
+    assert.Equal(t, "(scritto|orale)-(\\d{4}-\\d{2}-\\d{2})(-(\\d))?-((\\w|\\d)+)\\.(txt|tex|md|pdf|doc|docx)", expr.String())
+}
