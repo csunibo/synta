@@ -1,16 +1,25 @@
 package synta
 
 import (
-	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-type DefinitionString struct {
-	Comments     []string
-	RegexpString string
+func checkDefinitions(t *testing.T, definitions map[Identifier]Definition, expected map[string]string) {
+	for id, def := range definitions {
+		regexp, ok := expected[string(id)]
+		if !ok {
+			t.Errorf("Found unexpected defintion: %s = %s", string(id), def.Regexp.String())
+		}
+
+		assert.Equal(t, def.Regexp.String(), regexp)
+		delete(expected, string(id))
+	}
+
+	if len(expected) > 0 {
+		t.Errorf("Missing expected definitons: %v", expected)
+	}
 }
 
 func TestParseSyntaWithEmptyFile(t *testing.T) {
@@ -27,17 +36,14 @@ func TestParseSyntaWithSingleDefinition(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, synta.Definitions)
 
-	def := map[Identifier]DefinitionString{}
-	def["test"] = DefinitionString{RegexpString: regexp.MustCompile("a|b").String()}
-	defParsed := map[Identifier]DefinitionString{}
-	for id, d := range synta.Definitions {
-		fmt.Printf("Checking for key `%s`\n", id)
-		defParsed[id] = DefinitionString{d.Comments, d.Regexp.String()}
-		assert.Equal(t, def[id], defParsed[id])
+	exp := map[string]string{
+		"test": "a|b",
 	}
+	checkDefinitions(t, synta.Definitions, exp)
 
 	assert.NotEmpty(t, synta.Filename)
-	// TODO: controllare anche che filename contenga le strutture appropriate
-	seg := Segment{Identifier: "test", Optional: false}
-	assert.Contains(t, synta.Filename, seg)
+	assert.Equal(t, synta.Filename, Filename{
+		Segments:  []Segment{{Identifier("test"), false}, {Identifier("test"), false}},
+		Extension: Identifier("test"),
+	})
 }
