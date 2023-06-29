@@ -26,6 +26,8 @@ type Segment struct {
 	Optional   bool
 }
 
+// Filename represents the flename defintion, made up
+// of a series of segments and a file extension
 type Filename struct {
 	Segments  []Segment
 	Extension Identifier
