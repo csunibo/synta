@@ -43,6 +43,8 @@ Il linguaggio Synta è definito dalla seguente BNF:
 ```
 
 dove `<regexp>` è una valida sintassi che esprime una espressione regolare.
+La sintassi regexp usata è quella di Go, ma per i nostri fini, dovrebbe essere
+anche compatibile con quella di Javascript e Rust.
 
 ## Esempi
 
