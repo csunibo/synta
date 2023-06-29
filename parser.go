@@ -32,7 +32,7 @@ func ParseSynta(contents string) (s Synta, err error) {
 
 	s.Definitions = map[Identifier]Definition{}
 	for len(definitionLines) > 0 {
-		consumed, id, def, err = ParseFirstDefinition(definitionLines)
+		consumed, id, def, err = parseFirstDefinition(definitionLines)
 		definitionLines = definitionLines[consumed:]
 		if err != nil {
 			return
@@ -46,7 +46,7 @@ func ParseSynta(contents string) (s Synta, err error) {
 		}
 	}
 
-	s.Filename.Segments, s.Filename.Extension, err = ParseFilename(filenameLine)
+	s.Filename.Segments, s.Filename.Extension, err = parseFilename(filenameLine)
 	requiredIdentifiers := []Identifier{s.Filename.Extension}
 	for _, seg := range s.Filename.Segments {
 		requiredIdentifiers = append(requiredIdentifiers, seg.Identifier)
@@ -64,7 +64,7 @@ func ParseSynta(contents string) (s Synta, err error) {
 // All the lines from start to the defintion must be comments. If the defintion
 // identifier is not valid, we return an error, otherwise, the definition index,
 // the definition identifier and the definition itself are returned.
-func ParseFirstDefinition(lines []string) (consumed int, id Identifier, def Definition, err error) {
+func parseFirstDefinition(lines []string) (consumed int, id Identifier, def Definition, err error) {
 	for _, line := range lines {
 		consumed++
 		if line[0] == ';' {
@@ -118,11 +118,11 @@ func push(segments []Segment, seg *Segment) (updatedSegments []Segment) {
 	return
 }
 
-// ParseFilename checks if the line starts with "> ", or errors otherwise.
+// parseFilename checks if the line starts with "> ", or errors otherwise.
 // Then, it parses a list of segments from the line using a DFA. If an invalid
 // char is found, an error is returned, otherwise the result is the list of
 // prased defintions.
-func ParseFilename(line string) (def []Segment, ext Identifier, err error) {
+func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 	if len(line) < 2 || line[:2] != "> " {
 		err = errors.New("Not a Filename")
 		return
