@@ -15,7 +15,7 @@ func TestConvertBasic(t *testing.T) {
 
 	expr, err := Convert(basicSynta)
 	assert.Nil(t, err)
-    assert.Equal(t, "(a|b)-(a|b)\\.(a|b)", expr.String())
+    assert.Equal(t, "^(a|b)-(a|b)\\.(a|b)$", expr.String())
 }
 
 func TestConvertBasicOptional(t *testing.T) {
@@ -26,7 +26,7 @@ func TestConvertBasicOptional(t *testing.T) {
 
 	expr, err := Convert(basicSynta)
 	assert.Nil(t, err)
-    assert.Equal(t, "(a|b)(-(a|b))?\\.(a|b)", expr.String())
+    assert.Equal(t, "^(a|b)(-(a|b))?\\.(a|b)$", expr.String())
 }
 
 func TestConvertMutiple(t *testing.T) {
@@ -38,7 +38,7 @@ castoro = roditore|anfibio
 
 	expr, err := Convert(basicSynta)
 	assert.Nil(t, err)
-    assert.Equal(t, "(a|b)-(roditore|anfibio)(-(a|b))?\\.(roditore|anfibio)", expr.String())
+    assert.Equal(t, "^(a|b)-(roditore|anfibio)(-(a|b))?\\.(roditore|anfibio)$", expr.String())
 }
 
 func TestConvertExapleOnReadme(t * testing.T) {
@@ -60,5 +60,5 @@ ext = txt|tex|md|pdf|doc|docx
 
 	expr, err := Convert(basicSynta)
 	assert.Nil(t, err)
-    assert.Equal(t, "(scritto|orale)-(\\d{4}-\\d{2}-\\d{2})(-(\\d))?-((\\w|\\d)+)\\.(txt|tex|md|pdf|doc|docx)", expr.String())
+    assert.Equal(t, "^(scritto|orale)-(\\d{4}-\\d{2}-\\d{2})(-(\\d))?-((\\w|\\d)+)\\.(txt|tex|md|pdf|doc|docx)$", expr.String())
 }

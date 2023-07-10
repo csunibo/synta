@@ -8,14 +8,13 @@ import (
 )
 
 func Convert(synta synta.Synta) (expr *regexp.Regexp, err error) {
-	filenameRegexp, err := ConvertWithoutExtension(synta)
+	finalString, err := convertWithoutExtensionString(synta)
 	if err != nil {
 		return
 	}
-	finalString := filenameRegexp.String()
 
 	finalString += "\\.(" + synta.Definitions[synta.Filename.Extension].Regexp.String() + ")"
-	expr, err = regexp.Compile(finalString)
+    expr, err = regexp.Compile("^" + finalString + "$")
 
 	// Simplify when we use regexp/syntax
 	// if err == nil {
@@ -24,8 +23,7 @@ func Convert(synta synta.Synta) (expr *regexp.Regexp, err error) {
 	return
 }
 
-func ConvertWithoutExtension(synta synta.Synta) (expr *regexp.Regexp, err error) {
-	var finalString string = ""
+func convertWithoutExtensionString(synta synta.Synta) (expr string, err error) {
 	for i, segment := range synta.Filename.Segments {
 		definition, isPresent := synta.Definitions[segment.Identifier]
 
@@ -35,16 +33,23 @@ func ConvertWithoutExtension(synta synta.Synta) (expr *regexp.Regexp, err error)
 		}
 
 		if segment.Optional {
-			finalString += "(-(" + definition.Regexp.String() + "))?"
+			expr += "(-(" + definition.Regexp.String() + "))?"
 		} else {
-			finalString += "(" + definition.Regexp.String() + ")"
+			expr += "(" + definition.Regexp.String() + ")"
 		}
 
 		if i != len(synta.Filename.Segments)-1 && !synta.Filename.Segments[i+1].Optional {
-			finalString += "-"
+			expr += "-"
 		}
 	}
+	return
+}
 
-	expr, err = regexp.Compile(finalString)
+func ConvertWithoutExtension(synta synta.Synta) (expr *regexp.Regexp, err error) {
+    exp, err := convertWithoutExtensionString(synta)
+    if err != nil {
+        return
+    }
+    expr, err = regexp.Compile("^" + exp + "$")
 	return
 }
