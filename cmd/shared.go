@@ -24,7 +24,7 @@ func parseFile(p subcommands.Command, f *flag.FlagSet) (*synta.Synta, subcommand
 
 	synta, err := synta.ParseSynta(string(contents))
 	if err != nil {
-		fmt.Printf("Invalid syuntax:\n%v", err)
+		fmt.Printf("Invalid syntax: %v\n", err)
 		return nil, subcommands.ExitFailure
 	}
 	return &synta, subcommands.ExitSuccess

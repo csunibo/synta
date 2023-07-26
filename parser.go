@@ -54,13 +54,16 @@ func ParseSynta(contents string) (s Synta, err error) {
 	}
 
 	s.Filename.Segments, s.Filename.Extension, err = parseFilename(filenameLine)
+	if err != nil {
+		return
+	}
 	requiredIdentifiers := []Identifier{s.Filename.Extension}
 	for _, seg := range s.Filename.Segments {
 		requiredIdentifiers = append(requiredIdentifiers, seg.Identifier)
 	}
 	for _, id := range requiredIdentifiers {
 		if _, ok := s.Definitions[id]; !ok {
-			err = fmt.Errorf("Missing defintion for `%s`", id)
+			err = fmt.Errorf("Missing definition for `%s`", id)
 			return
 		}
 	}
@@ -69,12 +72,12 @@ func ParseSynta(contents string) (s Synta, err error) {
 }
 
 func MustSynta(contents string) Synta {
-    s, err := ParseSynta(contents)
-    if err != nil {
-        panic(err)
-    }
+	s, err := ParseSynta(contents)
+	if err != nil {
+		panic(err)
+	}
 
-    return s
+	return s
 }
 
 // ParseNextDefinition loops from the start line, until a definition is found.
@@ -149,8 +152,9 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 	seg := Segment{}
 	clear(&seg)
 
-	for i := 0; err == nil && i < len(line); i++ {
-		c := line[i]
+	col := 0
+	for col = 0; err == nil && col < len(line); col++ {
+		c := line[col]
 		switch state {
 		case State0:
 			if isLetter(c) {
@@ -210,8 +214,11 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 				state = State0
 			} else if c == '.' {
 				state = State7
+			} else if c == '(' {
+				seg.Optional = true
+				state = State2
 			} else {
-				err = errors.New("Expected a - or a ?")
+				err = errors.New("Expected either a - or a . or a (")
 			}
 		case State7:
 			if isLetter(c) {
@@ -228,8 +235,17 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 			}
 		}
 	}
+
+	// ensure that we stop on an accepting state
+	if err == nil && state != State8 {
+		err = fmt.Errorf("Stopped at a non-accepting state (was %d, expected 8)", state)
+	}
 	// handle the filename extension
 	ext = seg.Identifier
 
+	// add debug information to the error string
+	if err != nil {
+		err = fmt.Errorf("Invalid char at column %d:\n%s\n%s\n%v", col, line, strings.Repeat(" ", col-1)+"^", err)
+	}
 	return
 }
