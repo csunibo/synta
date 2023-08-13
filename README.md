@@ -69,11 +69,32 @@ stringa, in quanto l'analisi delle definizioni e dei commenti è piuttosto facil
 Per il parse della linea finale, che contiene la concatenazione di tutte le
 regole, usiamo invece un piccolo FSA con side-effect come segue:
 
-![FSA per il riconoscimento del nome del file](./automata.jpg)
+``` mermaid
+graph TD
+0 -- "-             , list"                     --> 1
+0 -- "(     , L+1     "                         --> 2
+1 -- "[a-z]         , concat"                   --> 0
+1 -- "[a-z]         , concat"                   --> 1
+1 -- "(     , L+1   , list"                     --> 2
+1 -- ".             , L!=0 ? ERR : list"        --> 7
+2 -- "-               "                         --> 3
+3 -- "[a-z]         , concat"                   --> 4
+4 -- "(     , L+1     "                         --> 2
+4 -- "[a-z]         , concat"                   --> 4
+4 -- ")     , L-1     "                         --> 5
+5 -- "?             , L>1 ? list_nested : list" --> 6
+6 -- "-               "                         --> 0
+6 -- "(     , L+1     "                         --> 2
+6 -- ".             , L!=0 ? ERR : "            --> 7
+7 -- "[a-z]         , concat"                   --> 8
+8 -- "[a-z]         , concat"                   --> 8
+```
 
 I side-effect sono:
 - `concat`: concatena il simbolo letto ad `id`
 - `list`: inserisce `id` nella lista degli identificatori, e imposta `id = ""`
+- `list_nested`: gestisce il caso precedente in caso di sezioni condizionate nestate
+- `L`: variabile per gestire la profondità
 
 ## Sviluppo
 
