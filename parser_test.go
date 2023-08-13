@@ -167,3 +167,41 @@ test = a|b
 		Extension: Identifier("test"),
 	})
 }
+
+func TestParseSyntaWithNestedOptional(t *testing.T) {
+	input := `; a test comment
+; a second comment
+test = a|b
+> test(-test(-test-test)?)?.test`
+	synta, err := ParseSynta(input)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, synta.Definitions)
+
+	exp := StringDefintions{
+		"test": {"a|b", []string{"a test comment", "a second comment"}},
+	}
+	checkDefinitions(t, synta.Definitions, exp)
+
+	assert.NotEmpty(t, synta.Filename)
+	assert.Equal(t, synta.Filename, Filename{
+		Segments:  []Segment{{Identifier("test"), false}, {Identifier("test"), true}},
+		Extension: Identifier("test"),
+	})
+}
+
+func TestParseSyntaWithNestedOptionalError(t *testing.T) {
+	input := `; a test comment
+; a second comment
+test = a|b
+> test(-test(-test-test)?)?)?.test`
+	_, err := ParseSynta(input)
+	assert.NotNil(t, err)
+}
+func TestParseSyntaWithNestedOptionalErrorBis(t *testing.T) {
+	input := `; a test comment
+; a second comment
+test = a|b
+> test(-test(-test-test)?.test`
+	_, err := ParseSynta(input)
+	assert.NotNil(t, err)
+}
