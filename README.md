@@ -84,9 +84,4 @@ Ecco una lista dei file nella repository e il loro scopo:
 ├── parser_test.go # Unit test per il parser
 ```
 
-# Origine del nome
-
-[^1] è uno dei top-10 nomi suggeriti da chat gpt. Abbiamo usato il prompt:
-
-> suggest me a short name for a tiny parser command line utility. the name must
-> not be made up of two or more words
+[^1]: **Origine del nome**: è uno dei top-10 nomi suggeriti da chat gpt. Abbiamo usato il prompt: "suggest me a short name for a tiny parser command line utility. the name must not be made up of two or more words"
