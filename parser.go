@@ -132,8 +132,12 @@ func clear(seg *Segment) {
 	seg.Optional = false
 }
 
-func push(segments []Segment, seg *Segment) (updatedSegments []Segment) {
-	updatedSegments = append(segments, *seg)
+func push(segments []Segment, seg *Segment, nested bool) (updatedSegments []Segment) {
+	if nested {
+		updatedSegments = append(segments[len(segments)-1].NestedSeg, *seg)
+	} else {
+		updatedSegments = append(segments, *seg)
+	}
 	clear(seg)
 	return
 }
@@ -149,6 +153,7 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 	}
 	line = line[2:]
 	state := State0
+	depth := 0
 	seg := Segment{}
 	clear(&seg)
 
@@ -161,6 +166,7 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 				concat(&seg, c)
 				state = State1
 			} else if c == '(' {
+				depth++
 				state = State2
 			} else {
 				err = errors.New("Expected either a char or a (")
@@ -169,15 +175,19 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 			if isLetter(c) {
 				concat(&seg, c)
 			} else if c == '-' {
-				def = push(def, &seg)
+				def = push(def, &seg, false)
 				state = State0
 			} else if c == '(' {
-				def = push(def, &seg)
+				def = push(def, &seg, false)
 				seg.Optional = true
 				state = State2
 			} else if c == '.' {
-				def = push(def, &seg)
-				state = State7
+				if depth == 0 {
+					def = push(def, &seg, false)
+					state = State7
+				} else {
+					err = errors.New("Depth is not 0, you must close the optional segment")
+				}
 			} else {
 				err = errors.New("Expected either a char, or a -, or a ( or a .")
 			}
@@ -198,13 +208,26 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 			if isLetter(c) {
 				concat(&seg, c)
 			} else if c == ')' {
+				if depth > 1 {
+					def = push(def, &seg, true)
+				} else {
+					def = push(def, &seg, false)
+				}
+				depth--
 				state = State5
+			} else if c == '(' {
+				if depth > 1 {
+					def = push(def, &seg, true)
+				} else {
+					def = push(def, &seg, false)
+				}
+				depth++
+				state = State2
 			} else {
-				err = errors.New("Expected a char")
+				err = errors.New("Expected a char, or a ( or a )")
 			}
 		case State5:
 			if c == '?' {
-				def = push(def, &seg)
 				state = State6
 			} else {
 				err = errors.New("Expected a ?")
@@ -215,8 +238,12 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 			} else if c == '.' {
 				state = State7
 			} else if c == '(' {
+				depth++
 				seg.Optional = true
 				state = State2
+			} else if c == ')' {
+				depth--
+				state = State5
 			} else {
 				err = errors.New("Expected either a - or a . or a (")
 			}

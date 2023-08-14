@@ -76,7 +76,7 @@ func TestParseSyntaWithSingleDefinition(t *testing.T) {
 
 	assert.NotEmpty(t, synta.Filename)
 	assert.Equal(t, synta.Filename, Filename{
-		Segments:  []Segment{{Identifier("test"), false}, {Identifier("test"), false}},
+		Segments:  []Segment{{Identifier("test"), false, []Segment(nil)}, {Identifier("test"), false, []Segment(nil)}},
 		Extension: Identifier("test"),
 	})
 }
@@ -96,7 +96,7 @@ test = a|b
 
 	assert.NotEmpty(t, synta.Filename)
 	assert.Equal(t, synta.Filename, Filename{
-		Segments:  []Segment{{Identifier("test"), false}, {Identifier("test"), false}},
+		Segments:  []Segment{{Identifier("test"), false, []Segment(nil)}, {Identifier("test"), false, []Segment(nil)}},
 		Extension: Identifier("test"),
 	})
 }
@@ -117,7 +117,7 @@ test = a|b
 
 	assert.NotEmpty(t, synta.Filename)
 	assert.Equal(t, synta.Filename, Filename{
-		Segments:  []Segment{{Identifier("test"), false}, {Identifier("test"), false}},
+		Segments:  []Segment{{Identifier("test"), false, []Segment(nil)}, {Identifier("test"), false, []Segment(nil)}},
 		Extension: Identifier("test"),
 	})
 }
@@ -142,7 +142,7 @@ teest = a|b
 
 	assert.NotEmpty(t, synta.Filename)
 	assert.Equal(t, synta.Filename, Filename{
-		Segments:  []Segment{{Identifier("test"), false}, {Identifier("teest"), false}},
+		Segments:  []Segment{{Identifier("test"), false, []Segment(nil)}, {Identifier("teest"), false, []Segment(nil)}},
 		Extension: Identifier("teest"),
 	})
 }
@@ -163,16 +163,17 @@ test = a|b
 
 	assert.NotEmpty(t, synta.Filename)
 	assert.Equal(t, synta.Filename, Filename{
-		Segments:  []Segment{{Identifier("test"), false}, {Identifier("test"), true}},
+		Segments:  []Segment{{Identifier("test"), false, []Segment(nil)}, {Identifier("test"), true, []Segment(nil)}},
 		Extension: Identifier("test"),
 	})
+
 }
 
 func TestParseSyntaWithNestedOptional(t *testing.T) {
 	input := `; a test comment
 ; a second comment
 test = a|b
-> test(-test(-test-test)?)?.test`
+> test(-test(-test(-test)?)?)?.test`
 	synta, err := ParseSynta(input)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, synta.Definitions)
@@ -184,9 +185,13 @@ test = a|b
 
 	assert.NotEmpty(t, synta.Filename)
 	assert.Equal(t, synta.Filename, Filename{
-		Segments:  []Segment{{Identifier("test"), false}, {Identifier("test"), true}},
-		Extension: Identifier("test"),
-	})
+		Segments: []Segment{
+			{Identifier("test"), false, []Segment(nil)},
+			{Identifier("test"), true, []Segment{
+				{Identifier("test"), true, []Segment(nil)},
+				{Identifier("test"), true, []Segment(nil)},
+			}}},
+		Extension: "test"})
 }
 
 func TestParseSyntaWithNestedOptionalError(t *testing.T) {

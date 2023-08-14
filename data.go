@@ -24,6 +24,7 @@ type Definition struct {
 type Segment struct {
 	Identifier Identifier
 	Optional   bool
+	NestedSeg  []Segment
 }
 
 // Filename represents the flename defintion, made up
