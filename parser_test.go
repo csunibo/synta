@@ -193,7 +193,7 @@ func TestParseSyntaWithNestedOptionalError(t *testing.T) {
 	input := `; a test comment
 ; a second comment
 test = a|b
-> test(-test(-test-test)?)?)?.test`
+> test(-test(-test)?)?)?.test`
 	_, err := ParseSynta(input)
 	assert.NotNil(t, err)
 }
@@ -201,7 +201,7 @@ func TestParseSyntaWithNestedOptionalErrorBis(t *testing.T) {
 	input := `; a test comment
 ; a second comment
 test = a|b
-> test(-test(-test-test)?.test`
+> test(-test(-test)?.test`
 	_, err := ParseSynta(input)
 	assert.NotNil(t, err)
 }
