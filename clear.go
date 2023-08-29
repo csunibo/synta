@@ -6,7 +6,7 @@ func Clear(synta Synta) (s Synta) {
 	s.Definitions = map[Identifier]Definition{}
 	s.Definitions[s.Filename.Extension] = synta.Definitions[s.Filename.Extension]
 	for _, segment := range s.Filename.Segments {
-		s.Definitions[segment.Identifier] = synta.Definitions[segment.Identifier]
+		s.Definitions[*segment.value] = synta.Definitions[*segment.value]
 	}
 	return
 }

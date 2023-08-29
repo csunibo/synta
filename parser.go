@@ -57,10 +57,8 @@ func ParseSynta(contents string) (s Synta, err error) {
 	if err != nil {
 		return
 	}
-	requiredIdentifiers := []Identifier{s.Filename.Extension}
-	for _, seg := range s.Filename.Segments {
-		requiredIdentifiers = append(requiredIdentifiers, seg.Identifier)
-	}
+	requiredIdentifiers := getRequiredIdentifiers(s.Filename.Segments)
+	requiredIdentifiers = append(requiredIdentifiers, s.Filename.Extension)
 	for _, id := range requiredIdentifiers {
 		if _, ok := s.Definitions[id]; !ok {
 			err = fmt.Errorf("Missing definition for `%s`", id)
@@ -68,6 +66,17 @@ func ParseSynta(contents string) (s Synta, err error) {
 		}
 	}
 
+	return
+}
+
+func getRequiredIdentifiers(segments []Segment) (requiredIdentifiers []Identifier) {
+	for _, seg := range segments {
+		if seg.kind == SegmentTypeOptional {
+			requiredIdentifiers = append(requiredIdentifiers, getRequiredIdentifiers(seg.subsegments)...)
+		} else {
+			requiredIdentifiers = append(requiredIdentifiers, *seg.value)
+		}
+	}
 	return
 }
 
@@ -124,21 +133,48 @@ func isLetter(c byte) bool {
 }
 
 func concat(seg *Segment, c byte) {
-	seg.Identifier = Identifier(string(seg.Identifier) + string(c))
+	val := Identifier(string(*seg.value) + string(c))
+	seg.value = &val
 }
 
 func clear(seg *Segment) {
-	seg.Identifier = ""
-	seg.Optional = false
+	emptyValue := Identifier("")
+	seg.value = &emptyValue
+	seg.kind = SegmentTypeIdentifier
 }
 
-func push(segments []Segment, seg *Segment, nested bool) (updatedSegments []Segment) {
-	if nested {
-		updatedSegments = append(segments[len(segments)-1].NestedSeg, *seg)
+func push(segments []Segment, seg *Segment, depth int) {
+	// TODO da cancellare
+	fmt.Printf("push(%v, %v, %d)\n", segments, seg, depth)
+	fmt.Printf("push(%v, %#v, %d)\n", segments, *seg, depth)
+	fmt.Printf("\n\n")
+	tmp := []Segment{}
+	if depth > 0 {
+		tmp = segments
+	}
+
+	for i := 0; i < depth; i++ {
+		// TODO da cancellare
+		fmt.Print("len segments: ", len(segments)-1, "\n")
+		tmp = tmp[len(tmp)].subsegments
+	}
+	if depth > 0 {
+		segments = append(segments, *seg)
 	} else {
-		updatedSegments = append(segments, *seg)
+		tmp = append(tmp, *seg)
 	}
 	clear(seg)
+	return
+}
+
+func generateOptional(segments []Segment, depth int) {
+	newOptional := Segment{SegmentTypeOptional, nil, []Segment{}}
+	for i := 0; i < depth; i++ {
+		// TODO da cancellare
+		fmt.Print("len segments: ", len(segments)-1, "\n")
+		segments = segments[len(segments)].subsegments
+	}
+	segments = append(segments, newOptional)
 	return
 }
 
@@ -166,6 +202,7 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 				concat(&seg, c)
 				state = State1
 			} else if c == '(' {
+				generateOptional(def, depth)
 				depth++
 				state = State2
 			} else {
@@ -175,15 +212,16 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 			if isLetter(c) {
 				concat(&seg, c)
 			} else if c == '-' {
-				def = push(def, &seg, false)
+				push(def, &seg, depth)
 				state = State0
 			} else if c == '(' {
-				def = push(def, &seg, false)
-				seg.Optional = true
+				push(def, &seg, depth)
+				generateOptional(def, depth)
+				depth++
 				state = State2
 			} else if c == '.' {
 				if depth == 0 {
-					def = push(def, &seg, false)
+					push(def, &seg, depth)
 					state = State7
 				} else {
 					err = errors.New("Depth is not 0, you must close the optional segment")
@@ -208,19 +246,12 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 			if isLetter(c) {
 				concat(&seg, c)
 			} else if c == ')' {
-				if depth > 1 {
-					def = push(def, &seg, true)
-				} else {
-					def = push(def, &seg, false)
-				}
+				push(def, &seg, depth)
 				depth--
 				state = State5
 			} else if c == '(' {
-				if depth > 1 {
-					def = push(def, &seg, true)
-				} else {
-					def = push(def, &seg, false)
-				}
+				push(def, &seg, depth)
+				generateOptional(def, depth)
 				depth++
 				state = State2
 			} else {
@@ -234,18 +265,26 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 			}
 		case State6:
 			if c == '-' {
-				state = State0
+				if depth == 0 {
+					state = State0
+				} else {
+					err = errors.New("Depth is not 0, you must close the optional segment")
+				}
 			} else if c == '.' {
-				state = State7
+				if depth == 0 {
+					state = State7
+				} else {
+					err = errors.New("Depth is not 0, you must close the optional segment")
+				}
 			} else if c == '(' {
+				generateOptional(def, depth)
 				depth++
-				seg.Optional = true
 				state = State2
 			} else if c == ')' {
 				depth--
 				state = State5
 			} else {
-				err = errors.New("Expected either a - or a . or a (")
+				err = errors.New("Expected either a - or a . or a ( or a )")
 			}
 		case State7:
 			if isLetter(c) {
@@ -268,7 +307,7 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 		err = fmt.Errorf("Stopped at a non-accepting state (was %d, expected 8)", state)
 	}
 	// handle the filename extension
-	ext = seg.Identifier
+	ext = *seg.value
 
 	// add debug information to the error string
 	if err != nil {

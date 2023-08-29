@@ -73,19 +73,19 @@ regole, usiamo invece un piccolo FSA con side-effect come segue:
 ``` mermaid
 graph TD
 0 -- "[a-z]         , concat"                   --> 1
-0 -- "(     , L+1     "                         --> 2
-1 -- "-             , list"                     --> 0
+0 -- "(     , L+1   , generateOptional"         --> 2
+1 -- "-             , push"                     --> 0
 1 -- "[a-z]         , concat"                   --> 1
-1 -- "(     , L+1   , list"                     --> 2
-1 -- ".             , L!=0 ? ERR : list"        --> 7
+1 -- "(     , L+1   , push; generateOptional"   --> 2
+1 -- ".             , L!=0 ? ERR : push"        --> 7
 2 -- "-               "                         --> 3
 3 -- "[a-z]         , concat"                   --> 4
-4 -- "(     , L+1   , L>1 ? list_nested : list" --> 2
+4 -- "(     , L+1   , push; generateOptional"   --> 2
 4 -- "[a-z]         , concat"                   --> 4
-4 -- ")     , L-1   , L>1 ? list_nested : list" --> 5
+4 -- ")     , L-1   , push"                     --> 5
 5 -- "?"                                        --> 6
-6 -- "-               "                         --> 0
-6 -- "(     , L+1     "                         --> 2
+6 -- "-             , L!=0 ? ERR : "            --> 0
+6 -- "(     , L+1   , generateOptional "        --> 2
 6 -- ")     , L-1     "                         --> 5
 6 -- ".             , L!=0 ? ERR : "            --> 7
 7 -- "[a-z]         , concat"                   --> 8
@@ -93,10 +93,12 @@ graph TD
 ```
 
 I side-effect sono:
-- `concat`: concatena il simbolo letto ad `id`
-- `list`: inserisce `id` nella lista degli identificatori, e imposta `id = ""`
-- `list_nested`: gestisce il caso precedente in caso di sezioni condizionate nestate
 - `L`: variabile per gestire il livello di profondità
+- `concat`: concatena il simbolo letto ad `id`
+- `push`: a seconda del livello di profondita' aggiunge alla struttura l'`id`
+letto fin'ora
+- `generateOptional`: crea la struttura per aggiungere blocchi opzionali in
+seguito tramite push
 
 ## Sviluppo
 
