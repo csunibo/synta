@@ -188,7 +188,7 @@ test = a|b
 			{
 				SegmentTypeOptional,
 				nil,
-				[]Segment{{SegmentTypeIdentifier, &id_test, []Segment{}}},
+				[]Segment{{SegmentTypeIdentifier, &id_test, []Segment(nil)}},
 			},
 		},
 		Extension: Identifier("test"),

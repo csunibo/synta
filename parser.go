@@ -143,38 +143,34 @@ func clear(seg *Segment) {
 	seg.kind = SegmentTypeIdentifier
 }
 
-func push(segments []Segment, seg *Segment, depth int) {
-	// TODO da cancellare
-	fmt.Printf("push(%v, %v, %d)\n", segments, seg, depth)
-	fmt.Printf("push(%v, %#v, %d)\n", segments, *seg, depth)
-	fmt.Printf("\n\n")
-	tmp := []Segment{}
-	if depth > 0 {
-		tmp = segments
-	}
-
-	for i := 0; i < depth; i++ {
-		// TODO da cancellare
-		fmt.Print("len segments: ", len(segments)-1, "\n")
-		tmp = tmp[len(tmp)].subsegments
+func push(segments []Segment, seg *Segment, depth int) (updatedSegments []Segment) {
+	backup := segments
+	for i := 0; i < depth-1; i++ {
+		segments = segments[len(segments)-1].subsegments
 	}
 	if depth > 0 {
-		segments = append(segments, *seg)
+		segments[len(segments)-1].subsegments = append(segments[len(segments)-1].subsegments, *seg)
 	} else {
-		tmp = append(tmp, *seg)
+		backup = append(backup, *seg)
 	}
+	updatedSegments = backup
 	clear(seg)
 	return
 }
 
-func generateOptional(segments []Segment, depth int) {
+func generateOptional(segments []Segment, depth int) (updatedSegments []Segment) {
+	backup := segments
 	newOptional := Segment{SegmentTypeOptional, nil, []Segment{}}
-	for i := 0; i < depth; i++ {
-		// TODO da cancellare
-		fmt.Print("len segments: ", len(segments)-1, "\n")
-		segments = segments[len(segments)].subsegments
+
+	for i := 0; i < depth-1; i++ {
+		segments = segments[len(segments)-1].subsegments
 	}
-	segments = append(segments, newOptional)
+	if depth > 0 {
+		segments[len(segments)-1].subsegments = append(segments[len(segments)-1].subsegments, newOptional)
+	} else {
+		backup = append(backup, newOptional)
+	}
+	updatedSegments = backup
 	return
 }
 
@@ -196,13 +192,15 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 	col := 0
 	for col = 0; err == nil && col < len(line); col++ {
 		c := line[col]
+		// TODO
+		fmt.Print(state, "|", string(c), ", ")
 		switch state {
 		case State0:
 			if isLetter(c) {
 				concat(&seg, c)
 				state = State1
 			} else if c == '(' {
-				generateOptional(def, depth)
+				def = generateOptional(def, depth)
 				depth++
 				state = State2
 			} else {
@@ -212,16 +210,16 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 			if isLetter(c) {
 				concat(&seg, c)
 			} else if c == '-' {
-				push(def, &seg, depth)
+				def = push(def, &seg, depth)
 				state = State0
 			} else if c == '(' {
-				push(def, &seg, depth)
-				generateOptional(def, depth)
+				def = push(def, &seg, depth)
+				def = generateOptional(def, depth)
 				depth++
 				state = State2
 			} else if c == '.' {
 				if depth == 0 {
-					push(def, &seg, depth)
+					def = push(def, &seg, depth)
 					state = State7
 				} else {
 					err = errors.New("Depth is not 0, you must close the optional segment")
@@ -246,12 +244,12 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 			if isLetter(c) {
 				concat(&seg, c)
 			} else if c == ')' {
-				push(def, &seg, depth)
+				def = push(def, &seg, depth)
 				depth--
 				state = State5
 			} else if c == '(' {
-				push(def, &seg, depth)
-				generateOptional(def, depth)
+				def = push(def, &seg, depth)
+				def = generateOptional(def, depth)
 				depth++
 				state = State2
 			} else {
@@ -265,11 +263,7 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 			}
 		case State6:
 			if c == '-' {
-				if depth == 0 {
-					state = State0
-				} else {
-					err = errors.New("Depth is not 0, you must close the optional segment")
-				}
+				state = State0
 			} else if c == '.' {
 				if depth == 0 {
 					state = State7
@@ -277,7 +271,7 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 					err = errors.New("Depth is not 0, you must close the optional segment")
 				}
 			} else if c == '(' {
-				generateOptional(def, depth)
+				def = generateOptional(def, depth)
 				depth++
 				state = State2
 			} else if c == ')' {
