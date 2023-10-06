@@ -215,20 +215,47 @@ test = a|b
 	id_test := Identifier("test")
 	assert.Equal(t, synta.Filename, Filename{
 		Segments: []Segment{
-			{SegmentTypeIdentifier, &id_test, []Segment{
-				{SegmentTypeOptional, nil, []Segment{
-					{SegmentTypeIdentifier, &id_test, []Segment(nil)},
-					{SegmentTypeOptional, nil, []Segment{
-						{SegmentTypeIdentifier, &id_test, []Segment(nil)},
-					}},
-					{SegmentTypeIdentifier, &id_test, []Segment(nil)},
-					{SegmentTypeOptional, nil, []Segment{
-						{SegmentTypeIdentifier, &id_test, []Segment(nil)},
-					}},
-				}},
-			}},
+			{
+				SegmentTypeIdentifier,
+				&id_test,
+				[]Segment(nil),
+			}, {
+				kind:  SegmentTypeOptional,
+				value: nil,
+				subsegments: []Segment{
+					{
+						kind:        SegmentTypeIdentifier,
+						value:       &id_test,
+						subsegments: []Segment(nil),
+					}, {
+						kind:  SegmentTypeOptional,
+						value: nil,
+						subsegments: []Segment{
+							{
+								kind:        SegmentTypeIdentifier,
+								value:       &id_test,
+								subsegments: []Segment(nil),
+							},
+						},
+					}, {
+						kind:        SegmentTypeIdentifier,
+						value:       &id_test,
+						subsegments: []Segment(nil),
+					}, {
+						kind:  SegmentTypeOptional,
+						value: nil,
+						subsegments: []Segment{
+							{
+								kind:        SegmentTypeIdentifier,
+								value:       &id_test,
+								subsegments: []Segment(nil),
+							},
+						},
+					},
+				},
+			},
 		},
-		Extension: Identifier("test"),
+		Extension: "test",
 	})
 }
 
