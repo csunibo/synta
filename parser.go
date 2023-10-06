@@ -71,10 +71,10 @@ func ParseSynta(contents string) (s Synta, err error) {
 
 func getRequiredIdentifiers(segments []Segment) (requiredIdentifiers []Identifier) {
 	for _, seg := range segments {
-		if seg.kind == SegmentTypeOptional {
-			requiredIdentifiers = append(requiredIdentifiers, getRequiredIdentifiers(seg.subsegments)...)
+		if seg.Kind == SegmentTypeOptional {
+			requiredIdentifiers = append(requiredIdentifiers, getRequiredIdentifiers(seg.Subsegments)...)
 		} else {
-			requiredIdentifiers = append(requiredIdentifiers, *seg.value)
+			requiredIdentifiers = append(requiredIdentifiers, *seg.Value)
 		}
 	}
 	return
@@ -133,23 +133,23 @@ func isLetter(c byte) bool {
 }
 
 func concat(seg *Segment, c byte) {
-	val := Identifier(string(*seg.value) + string(c))
-	seg.value = &val
+	val := Identifier(string(*seg.Value) + string(c))
+	seg.Value = &val
 }
 
 func clear(seg *Segment) {
 	emptyValue := Identifier("")
-	seg.value = &emptyValue
-	seg.kind = SegmentTypeIdentifier
+	seg.Value = &emptyValue
+	seg.Kind = SegmentTypeIdentifier
 }
 
 func push(segments []Segment, seg *Segment, depth int) (updatedSegments []Segment) {
 	backup := segments
 	for i := 0; i < depth-1; i++ {
-		segments = segments[len(segments)-1].subsegments
+		segments = segments[len(segments)-1].Subsegments
 	}
 	if depth > 0 {
-		segments[len(segments)-1].subsegments = append(segments[len(segments)-1].subsegments, *seg)
+		segments[len(segments)-1].Subsegments = append(segments[len(segments)-1].Subsegments, *seg)
 	} else {
 		backup = append(backup, *seg)
 	}
@@ -163,10 +163,10 @@ func generateOptional(segments []Segment, depth int) (updatedSegments []Segment)
 	newOptional := Segment{SegmentTypeOptional, nil, []Segment{}}
 
 	for i := 0; i < depth-1; i++ {
-		segments = segments[len(segments)-1].subsegments
+		segments = segments[len(segments)-1].Subsegments
 	}
 	if depth > 0 {
-		segments[len(segments)-1].subsegments = append(segments[len(segments)-1].subsegments, newOptional)
+		segments[len(segments)-1].Subsegments = append(segments[len(segments)-1].Subsegments, newOptional)
 	} else {
 		backup = append(backup, newOptional)
 	}
@@ -192,8 +192,6 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 	col := 0
 	for col = 0; err == nil && col < len(line); col++ {
 		c := line[col]
-		// TODO
-		fmt.Print(state, "|", string(c), ", ")
 		switch state {
 		case State0:
 			if isLetter(c) {
@@ -301,7 +299,7 @@ func parseFilename(line string) (def []Segment, ext Identifier, err error) {
 		err = fmt.Errorf("Stopped at a non-accepting state (was %d, expected 8)", state)
 	}
 	// handle the filename extension
-	ext = *seg.value
+	ext = *seg.Value
 
 	// add debug information to the error string
 	if err != nil {

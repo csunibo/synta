@@ -29,9 +29,9 @@ const (
 // A Segment is a section of the main filename
 // It corresponds to the <segment> BNF definition
 type Segment struct {
-	kind        SegmentType
-	value       *Identifier
-	subsegments []Segment
+	Kind        SegmentType
+	Value       *Identifier
+	Subsegments []Segment
 }
 
 // Filename represents the flename defintion, made up

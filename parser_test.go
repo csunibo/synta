@@ -79,14 +79,14 @@ func TestParseSyntaWithSingleDefinition(t *testing.T) {
 	assert.Equal(t, synta.Filename, Filename{
 		Segments: []Segment{
 			{
-				kind:        SegmentTypeIdentifier,
-				value:       &id_test,
-				subsegments: []Segment(nil),
+				Kind:        SegmentTypeIdentifier,
+				Value:       &id_test,
+				Subsegments: []Segment(nil),
 			},
 			{
-				kind:        SegmentTypeIdentifier,
-				value:       &id_test,
-				subsegments: []Segment(nil),
+				Kind:        SegmentTypeIdentifier,
+				Value:       &id_test,
+				Subsegments: []Segment(nil),
 			},
 		},
 		Extension: Identifier("test"),
@@ -220,35 +220,35 @@ test = a|b
 				&id_test,
 				[]Segment(nil),
 			}, {
-				kind:  SegmentTypeOptional,
-				value: nil,
-				subsegments: []Segment{
+				Kind:  SegmentTypeOptional,
+				Value: nil,
+				Subsegments: []Segment{
 					{
-						kind:        SegmentTypeIdentifier,
-						value:       &id_test,
-						subsegments: []Segment(nil),
+						Kind:        SegmentTypeIdentifier,
+						Value:       &id_test,
+						Subsegments: []Segment(nil),
 					}, {
-						kind:  SegmentTypeOptional,
-						value: nil,
-						subsegments: []Segment{
+						Kind:  SegmentTypeOptional,
+						Value: nil,
+						Subsegments: []Segment{
 							{
-								kind:        SegmentTypeIdentifier,
-								value:       &id_test,
-								subsegments: []Segment(nil),
+								Kind:        SegmentTypeIdentifier,
+								Value:       &id_test,
+								Subsegments: []Segment(nil),
 							},
 						},
 					}, {
-						kind:        SegmentTypeIdentifier,
-						value:       &id_test,
-						subsegments: []Segment(nil),
+						Kind:        SegmentTypeIdentifier,
+						Value:       &id_test,
+						Subsegments: []Segment(nil),
 					}, {
-						kind:  SegmentTypeOptional,
-						value: nil,
-						subsegments: []Segment{
+						Kind:  SegmentTypeOptional,
+						Value: nil,
+						Subsegments: []Segment{
 							{
-								kind:        SegmentTypeIdentifier,
-								value:       &id_test,
-								subsegments: []Segment(nil),
+								Kind:        SegmentTypeIdentifier,
+								Value:       &id_test,
+								Subsegments: []Segment(nil),
 							},
 						},
 					},
