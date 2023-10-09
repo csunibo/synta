@@ -11,8 +11,9 @@ type Definition struct {
 // A Segment is a section of the main filename
 // It corresponds to the <segment> BNF definition
 type Segment struct {
-	Identifier string `json:"identifier"`
-	Optional   bool   `json:"optional"`
+	Kind        uint      `json:"kind"`
+	Value       string    `json:"value"`
+	Subsegments []Segment `json:"subsegments"`
 }
 
 // Filename represents the flename defintion, made up

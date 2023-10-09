@@ -25,18 +25,26 @@ func Format(syntaFile synta.Synta) (code string) {
 	}
 
 	code += "> "
-	for i, segment := range syntaFile.Filename.Segments {
-		if segment.Optional {
-			code += "(-" + string(segment.Identifier) + ")?"
-		} else {
-			code += string(segment.Identifier)
-		}
-
-		if i != len(syntaFile.Filename.Segments)-1 && !syntaFile.Filename.Segments[i+1].Optional {
-			code += "-"
-		}
-	}
+	expr := formatSegments(syntaFile.Filename.Segments)
+	code += expr
 	code += "." + string(syntaFile.Filename.Extension) + "\n"
 
+	return
+}
+
+func formatSegments(segments []synta.Segment) (expr string) {
+	for i, segment := range segments {
+		switch segment.Kind {
+		case synta.SegmentTypeIdentifier:
+			expr += string(*segment.Value)
+		case synta.SegmentTypeOptional:
+			exp := formatSegments(segment.Subsegments)
+			expr += "(-" + exp + ")?"
+		}
+
+		if i != len(segments)-1 && segments[i+1].Kind != synta.SegmentTypeOptional {
+			expr += "-"
+		}
+	}
 	return
 }

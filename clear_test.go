@@ -22,3 +22,20 @@ needless = c|d
 	}
 	checkDefinitions(t, synta.Definitions, exp)
 }
+
+func TestClearWithOptionalNested(t *testing.T) {
+	input := `; a test comment
+test = a|b
+teest = a|b
+needless = c|d
+> test(-teest(-teest)?(-test)?)?.teest`
+	synta, err := ParseSynta(input)
+	assert.Nil(t, err)
+	synta = Clear(synta)
+
+	exp := StringDefintions{
+		"test":  {"a|b", []string{"a test comment"}},
+		"teest": {"a|b", []string(nil)},
+	}
+	checkDefinitions(t, synta.Definitions, exp)
+}

@@ -48,18 +48,25 @@
     },
     "Segment": {
       "properties": {
-        "Identifier": {
+        "Kind": {
+          "type": "integer"
+        },
+        "Value": {
           "type": "string"
         },
-        "Optional": {
-          "type": "boolean"
+        "Subsegments": {
+          "items": {
+            "$ref": "#/$defs/Segment"
+          },
+          "type": "array"
         }
       },
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "Identifier",
-        "Optional"
+        "Kind",
+        "Value",
+        "Subsegments"
       ]
     },
     "Synta": {

@@ -62,3 +62,21 @@ test = c|d
 `
 	assert.Equal(t, formattedContent, formatted)
 }
+
+func TestFormatWithNestedOptional(t *testing.T) {
+	basicContent := `def = a|b
+test = c|d
+> def(-test(-def)?(-test)?)?.test
+`
+	basicSynta, err := synta.ParseSynta(basicContent)
+	assert.Nil(t, err)
+
+	formatted := Format(basicSynta)
+	formattedContent := `def = a|b
+
+test = c|d
+
+> def(-test(-def)?(-test)?)?.test
+`
+	assert.Equal(t, formattedContent, formatted)
+}

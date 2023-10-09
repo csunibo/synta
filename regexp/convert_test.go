@@ -8,41 +8,41 @@ import (
 )
 
 func TestConvertBasic(t *testing.T) {
-    content := `test = a|b
+	content := `test = a|b
 > test-test.test`
-    basicSynta, err := synta.ParseSynta(content)
-    assert.Nil(t, err)
+	basicSynta, err := synta.ParseSynta(content)
+	assert.Nil(t, err)
 
 	expr, err := Convert(basicSynta)
 	assert.Nil(t, err)
-    assert.Equal(t, "^(a|b)-(a|b)\\.(a|b)$", expr.String())
+	assert.Equal(t, "^(a|b)-(a|b)\\.(a|b)$", expr.String())
 }
 
 func TestConvertBasicOptional(t *testing.T) {
-    content := `test = a|b
+	content := `test = a|b
 > test(-test)?.test`
-    basicSynta, err := synta.ParseSynta(content)
-    assert.Nil(t, err)
+	basicSynta, err := synta.ParseSynta(content)
+	assert.Nil(t, err)
 
 	expr, err := Convert(basicSynta)
 	assert.Nil(t, err)
-    assert.Equal(t, "^(a|b)(-(a|b))?\\.(a|b)$", expr.String())
+	assert.Equal(t, "^(a|b)(-(a|b))?\\.(a|b)$", expr.String())
 }
 
 func TestConvertMutiple(t *testing.T) {
-    content := `test = a|b
+	content := `test = a|b
 castoro = roditore|anfibio
 > test-castoro(-test)?.castoro`
-    basicSynta, err := synta.ParseSynta(content)
-    assert.Nil(t, err)
+	basicSynta, err := synta.ParseSynta(content)
+	assert.Nil(t, err)
 
 	expr, err := Convert(basicSynta)
 	assert.Nil(t, err)
-    assert.Equal(t, "^(a|b)-(roditore|anfibio)(-(a|b))?\\.(roditore|anfibio)$", expr.String())
+	assert.Equal(t, "^(a|b)-(roditore|anfibio)(-(a|b))?\\.(roditore|anfibio)$", expr.String())
 }
 
-func TestConvertExapleOnReadme(t * testing.T) {
-    content := `; La tipologia della prova
+func TestConvertExapleOnReadme(t *testing.T) {
+	content := `; La tipologia della prova
 tipo = scritto|orale
 ; Una data del tipo yyyy-mm-dd
 data = \d{4}-\d{2}-\d{2}
@@ -55,10 +55,24 @@ extra = (\w|\d)+
 ext = txt|tex|md|pdf|doc|docx
 
 > tipo-data(-fila)?-extra.ext`
-    basicSynta, err := synta.ParseSynta(content)
-    assert.Nil(t, err)
+	basicSynta, err := synta.ParseSynta(content)
+	assert.Nil(t, err)
 
 	expr, err := Convert(basicSynta)
 	assert.Nil(t, err)
-    assert.Equal(t, "^(scritto|orale)-(\\d{4}-\\d{2}-\\d{2})(-(\\d))?-((\\w|\\d)+)\\.(txt|tex|md|pdf|doc|docx)$", expr.String())
+	assert.Equal(t, "^(scritto|orale)-(\\d{4}-\\d{2}-\\d{2})(-(\\d))?-((\\w|\\d)+)\\.(txt|tex|md|pdf|doc|docx)$", expr.String())
+}
+
+func TestConvertMutipleNestedOptional(t *testing.T) {
+	content := `test = a|b
+castoro = roditore|anfibio
+> test-castoro(-test(-castoro)?(-castoro)?)?.castoro`
+	basicSynta, err := synta.ParseSynta(content)
+	assert.Nil(t, err)
+
+	expr, err := Convert(basicSynta)
+	str := "^(a|b)-(roditore|anfibio)(-(a|b)(-(roditore|anfibio))?(-(roditore|anfibio))?)?\\.(roditore|anfibio)$"
+	assert.Nil(t, err)
+	assert.Equal(t, str, expr.String())
+
 }
