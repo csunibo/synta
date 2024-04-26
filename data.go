@@ -19,11 +19,19 @@ type Definition struct {
 	Regexp   *regexp.Regexp
 }
 
+type SegmentType uint
+
+const (
+	SegmentTypeIdentifier = iota
+	SegmentTypeOptional
+)
+
 // A Segment is a section of the main filename
 // It corresponds to the <segment> BNF definition
 type Segment struct {
-	Identifier Identifier
-	Optional   bool
+	Kind        SegmentType
+	Value       *Identifier
+	Subsegments []Segment
 }
 
 // Filename represents the flename defintion, made up

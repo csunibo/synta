@@ -75,8 +75,20 @@ func TestParseSyntaWithSingleDefinition(t *testing.T) {
 	checkDefinitions(t, synta.Definitions, exp)
 
 	assert.NotEmpty(t, synta.Filename)
+	id_test := Identifier("test")
 	assert.Equal(t, synta.Filename, Filename{
-		Segments:  []Segment{{Identifier("test"), false}, {Identifier("test"), false}},
+		Segments: []Segment{
+			{
+				Kind:        SegmentTypeIdentifier,
+				Value:       &id_test,
+				Subsegments: []Segment(nil),
+			},
+			{
+				Kind:        SegmentTypeIdentifier,
+				Value:       &id_test,
+				Subsegments: []Segment(nil),
+			},
+		},
 		Extension: Identifier("test"),
 	})
 }
@@ -95,8 +107,9 @@ test = a|b
 	checkDefinitions(t, synta.Definitions, exp)
 
 	assert.NotEmpty(t, synta.Filename)
+	id_test := Identifier("test")
 	assert.Equal(t, synta.Filename, Filename{
-		Segments:  []Segment{{Identifier("test"), false}, {Identifier("test"), false}},
+		Segments:  []Segment{{SegmentTypeIdentifier, &id_test, []Segment(nil)}, {SegmentTypeIdentifier, &id_test, []Segment(nil)}},
 		Extension: Identifier("test"),
 	})
 }
@@ -116,8 +129,9 @@ test = a|b
 	checkDefinitions(t, synta.Definitions, exp)
 
 	assert.NotEmpty(t, synta.Filename)
+	id_test := Identifier("test")
 	assert.Equal(t, synta.Filename, Filename{
-		Segments:  []Segment{{Identifier("test"), false}, {Identifier("test"), false}},
+		Segments:  []Segment{{SegmentTypeIdentifier, &id_test, []Segment(nil)}, {SegmentTypeIdentifier, &id_test, []Segment(nil)}},
 		Extension: Identifier("test"),
 	})
 }
@@ -141,8 +155,10 @@ teest = a|b
 	checkDefinitions(t, synta.Definitions, exp)
 
 	assert.NotEmpty(t, synta.Filename)
+	id_test := Identifier("test")
+	id_teest := Identifier("teest")
 	assert.Equal(t, synta.Filename, Filename{
-		Segments:  []Segment{{Identifier("test"), false}, {Identifier("teest"), false}},
+		Segments:  []Segment{{SegmentTypeIdentifier, &id_test, []Segment(nil)}, {SegmentTypeIdentifier, &id_teest, []Segment(nil)}},
 		Extension: Identifier("teest"),
 	})
 }
@@ -162,8 +178,100 @@ test = a|b
 	checkDefinitions(t, synta.Definitions, exp)
 
 	assert.NotEmpty(t, synta.Filename)
+	id_test := Identifier("test")
 	assert.Equal(t, synta.Filename, Filename{
-		Segments:  []Segment{{Identifier("test"), false}, {Identifier("test"), true}},
+		Segments: []Segment{
+			{
+				SegmentTypeIdentifier,
+				&id_test,
+				[]Segment(nil)},
+			{
+				SegmentTypeOptional,
+				nil,
+				[]Segment{{SegmentTypeIdentifier, &id_test, []Segment(nil)}},
+			},
+		},
 		Extension: Identifier("test"),
 	})
+
+}
+
+func TestParseSyntaWithNestedOptional(t *testing.T) {
+	input := `; a test comment
+; a second comment
+test = a|b
+> test(-test(-test)?-test(-test)?)?.test`
+	synta, err := ParseSynta(input)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, synta.Definitions)
+
+	exp := StringDefintions{
+		"test": {"a|b", []string{"a test comment", "a second comment"}},
+	}
+	checkDefinitions(t, synta.Definitions, exp)
+
+	assert.NotEmpty(t, synta.Filename)
+
+	id_test := Identifier("test")
+	assert.Equal(t, synta.Filename, Filename{
+		Segments: []Segment{
+			{
+				SegmentTypeIdentifier,
+				&id_test,
+				[]Segment(nil),
+			}, {
+				Kind:  SegmentTypeOptional,
+				Value: nil,
+				Subsegments: []Segment{
+					{
+						Kind:        SegmentTypeIdentifier,
+						Value:       &id_test,
+						Subsegments: []Segment(nil),
+					}, {
+						Kind:  SegmentTypeOptional,
+						Value: nil,
+						Subsegments: []Segment{
+							{
+								Kind:        SegmentTypeIdentifier,
+								Value:       &id_test,
+								Subsegments: []Segment(nil),
+							},
+						},
+					}, {
+						Kind:        SegmentTypeIdentifier,
+						Value:       &id_test,
+						Subsegments: []Segment(nil),
+					}, {
+						Kind:  SegmentTypeOptional,
+						Value: nil,
+						Subsegments: []Segment{
+							{
+								Kind:        SegmentTypeIdentifier,
+								Value:       &id_test,
+								Subsegments: []Segment(nil),
+							},
+						},
+					},
+				},
+			},
+		},
+		Extension: "test",
+	})
+}
+
+func TestParseSyntaWithNestedOptionalError(t *testing.T) {
+	input := `; a test comment
+; a second comment
+test = a|b
+> test(-test(-test)?)?)?.test`
+	_, err := ParseSynta(input)
+	assert.NotNil(t, err)
+}
+func TestParseSyntaWithNestedOptionalErrorBis(t *testing.T) {
+	input := `; a test comment
+; a second comment
+test = a|b
+> test(-test(-test)?.test`
+	_, err := ParseSynta(input)
+	assert.NotNil(t, err)
 }
