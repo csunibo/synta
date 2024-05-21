@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/google/subcommands v1.2.0
 	github.com/invopop/jsonschema v0.7.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
